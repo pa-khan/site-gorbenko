@@ -1,0 +1,59 @@
+.icon-arrow-left-white {
+  background-image: url(../../img/sprite.png);
+  background-position: 0px 0px;
+  width: 49px;
+  height: 155px; }
+
+.icon-arrow-left-yellow {
+  background-image: url(../../img/sprite.png);
+  background-position: -49px 0px;
+  width: 49px;
+  height: 155px; }
+
+.icon-arrow-right-white {
+  background-image: url(../../img/sprite.png);
+  background-position: -98px 0px;
+  width: 49px;
+  height: 155px; }
+
+.icon-arrow-right-yellow {
+  background-image: url(../../img/sprite.png);
+  background-position: -147px 0px;
+  width: 49px;
+  height: 155px; }
+
+.icon-close {
+  background-image: url(../../img/sprite.png);
+  background-position: -196px -46px;
+  width: 31px;
+  height: 31px; }
+
+.icon-insta {
+  background-image: url(../../img/sprite.png);
+  background-position: -196px -110px;
+  width: 26px;
+  height: 26px; }
+
+.icon-mouse {
+  background-image: url(../../img/sprite.png);
+  background-position: -196px -77px;
+  width: 22px;
+  height: 33px; }
+
+.icon-triangle-transparent {
+  background-image: url(../../img/sprite.png);
+  background-position: -196px 0px;
+  width: 38px;
+  height: 46px; }
+
+.icon-triangle-white {
+  background-image: url(../../img/sprite.png);
+  background-position: -218px -77px;
+  width: 15px;
+  height: 15px; }
+
+.icon-triangles {
+  background-image: url(../../img/sprite.png);
+  background-position: -218px -92px;
+  width: 14px;
+  height: 14px; }

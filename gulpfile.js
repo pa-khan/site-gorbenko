@@ -10,9 +10,7 @@ var gulp       = require('gulp'),
 	pngquant     = require('imagemin-pngquant'), 
 	cache        = require('gulp-cache'), 
 	autoprefixer = require('gulp-autoprefixer'),
-	spritesmith = require('gulp.spritesmith'),
-	rsync = require('gulp-rsync'),
-	zip = require('gulp-zip');
+	spritesmith = require('gulp.spritesmith');
 
 
 gulp.task('sprite', function () {
@@ -43,7 +41,10 @@ gulp.task('browser-sync', function() {
 gulp.task('scripts', function() {
 	return gulp.src([ 
 		'app/template/libs/jquery/dist/jquery.js',
-		'app/template/libs/jquery.maskedinput/dist/jquery.maskedinput.min.js'
+		'app/template/libs/jquery.maskedinput/dist/jquery.maskedinput.min.js',
+		'app/template/libs/slick-carousel/slick/slick.js',
+		'app/template/libs/fancybox/dist/jquery.fancybox.js',
+		'app/template/libs/parallax.js/parallax.js'
 		])
 		.pipe(concat('libs.js')) 
 		.pipe(gulp.dest('app/template/scripts')); 
@@ -92,7 +93,7 @@ gulp.task('ftp', function() {
 		.pipe(rsync({
 			root: 'app/',
 			hostname: 'e5ashb4k_io@e5ashb4k.beget.tech',
-			destination: 'fl/layout/',
+			destination: 'fl/layout/gorbenko',
 			archive: true,
 			silent: false,
 			compress: true
