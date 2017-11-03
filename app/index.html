@@ -10,14 +10,6 @@
 	<!-- Favicon -->
 	<link rel="shortcut icon" href="/upload/favicon.png" type="image/png">
 
-	<!-- Styles -->
-	<link rel="stylesheet" href="template/styles/css/style.css" />
-	<link rel="stylesheet" href="template/styles/css/responsive.css" />
-
-	<!-- Scripts -->
-	<script src="template/scripts/libs.js"></script>
-	<script src="template/scripts/common.js"></script>
-
 	<!--[if lt IE 9]>
 			<script>
 				document.createElement('header');
@@ -31,23 +23,29 @@
 	<![endif]-->
 </head>
 <body>
+<!-- Styles -->
+<link rel="stylesheet" href="template/styles/css/style.css" />
+<link rel="stylesheet" href="template/styles/css/responsive.css" />
+
+
+
 <div class="popup popup_callback" id="popup-order">
 	<div class="popup__head">
-		<div class="popup__title title">Оставить <br>заявку</div>
-		<div class="popup__close"><i class="icon icon-close"></i></div>
+		<div class="popup__title title title_none">Оставить <br>заявку</div>
+		<div class="popup__close" data-fancybox-close><i class="icon icon-close"></i></div>
 	</div>
 	<div class="popup__body">
 		<input type="text" class="popup__input input input_gray" placeholder="Ваше имя">
-		<input type="text" class="popup__input input input_gray" placeholder="Ваш телефон">
+		<input type="text" class="popup__input input input_gray input_phone" placeholder="Ваш телефон">
 		<input type="text" class="popup__input input input_gray" placeholder="Ваш e-mail">
-		<button class="popup__button button button_transparent button_small"></button>
+		<button class="popup__button button button_transparent button_small">отправить</button>
 	</div>
 </div>
 
 <div class="popup popup_slider" id="popup-slider">
 	<div class="popup__head">
-		<div class="popup__title title">Барбекю <br/>в загородном доме</div>
-		<div class="popup__close"><i class="icon icon-close"></i></div>
+		<div class="popup__title title"></div>
+		<div class="popup__close" data-fancybox-close><i class="icon icon-close"></i></div>
 	</div>
 	<div class="popup__body">
 		<div class="popup__image"></div>
@@ -56,7 +54,8 @@
 </div>
 
 
-<header class="header" data-parallax="scroll" data-image-src="template/img/bg/header.png">
+
+<header class="header" data-parallax-bg-image="template/img/bg/header.png">
 	<div class="panel">
 		<div class="container">
 			<div class="panel__contacts">
@@ -65,15 +64,15 @@
 			</div>
 			<div class="panel__nav">
 				<ul>
-					<li><a href="">Фуршет</a></li>
-					<li><a href="">Банкет</a></li>
-					<li><a href="">Барбекю</a></li>
-					<li><a href="">Свадьбы</a></li>
-					<li><a href="">Детский ДР</a></li>
-					<li><a href="">Контакты</a></li>
+					<li><a href="#buffets">Фуршет</a></li>
+					<li><a href="#banquets">Банкет</a></li>
+					<li><a href="#picnic">Барбекю</a></li>
+					<li><a href="#wedding">Свадьбы</a></li>
+					<li><a href="#birthday">Детский ДР</a></li>
+					<li><a href="#contacts">Контакты</a></li>
 				</ul>
 			</div>
-			<div class="panel__button"><a data-fancybox data-src="#popup-callback" href="javascript:;" class="button button_transparent button_small">обратный звонок</a></div>
+			<div class="panel__button"><a data-fancybox data-src="#popup-order" href="javascript:;" class="button button_transparent button_small">обратный звонок</a></div>
 		</div>
 	</div>
 	<div class="header__content">
@@ -84,9 +83,18 @@
 			</div>
 			<div class="header__title">Организуем банкет, фуршет, барбекю <span>за 24 часа</span></div>
 			<div class="header__desc">там, где вы пожелаете</div>
-			<a href="" class="header__button button button_transparent button_big">Получить варианты меню</a>
+			<a data-fancybox data-src="#popup-order" href="javascript:;" class="header__button button button_transparent button_big">Получить варианты меню</a>
 			<div class="header__icon"><i class="icon icon-mouse"></i><i class="icon icon-triangles"></i></div>
 		</div>
+	</div>
+	<div class="header__images">
+		<div class="parallax-layer"><img src="upload/items/item-1.png" alt=""></div>
+		<div class="parallax-layer parallax-layer parallax-layer_work"><div><img src="upload/items/item-2.png" alt=""></div></div>
+		<div class="parallax-layer parallax-layer parallax-layer_work"><div><img src="upload/items/item-3.png" alt=""></div></div>
+		<div class="parallax-layer parallax-layer parallax-layer_work"><div><img src="upload/items/item-4.png" alt=""></div></div>
+		<div class="parallax-layer parallax-layer parallax-layer_work"><div><img src="upload/items/item-5.png" alt=""></div></div>
+		<div class="parallax-layer parallax-layer parallax-layer_work"><div><img src="upload/items/item-2.png" alt=""></div></div>
+		<div class="parallax-layer"><img src="upload/items/item-6.png" alt=""></div>
 	</div>
 </header>
 
@@ -108,19 +116,19 @@
 			</div>
 			<div class="digits row_line">
 				<div class="digits__item col_line">
-					<div class="digits__num" data-num="97"></div>
+					<div class="digits__num" data-num="97">0</div>
 					<div class="digits__text">Организованных <br>мероприятия</div>
 				</div>
 				<div class="digits__item col_line">
-					<div class="digits__num" data-num="159"></div>
+					<div class="digits__num" data-num="159">0</div>
 					<div class="digits__text">Довольных <br>клиентов</div>
 				</div>
 				<div class="digits__item col_line">
-					<div class="digits__num" data-num="47"></div>
+					<div class="digits__num" data-num="47">0</div>
 					<div class="digits__text">Постоянных <br>клиентов</div>
 				</div>
 				<div class="digits__item col_line">
-					<div class="digits__num" data-num="35"></div>
+					<div class="digits__num" data-num="35">0</div>
 					<div class="digits__text">Сотрудников <br>в компании</div>
 				</div>
 			</div>
@@ -133,26 +141,47 @@
 					<div class="videos__image"><img src="upload/video/1.jpg" alt=""></div>
 					<div class="videos__wrap">
 						<div class="videos__subtitle">День рождения вари</div>
-						<a href="" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
+						<a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
 					</div>
 				</div>
 				<div class="videos__item">
 					<div class="videos__image"><img src="upload/video/2.jpg" alt=""></div>
 					<div class="videos__wrap">
 						<div class="videos__subtitle">корпоратив для it компании sc</div>
-						<a href="" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
+						<a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
 					</div>
 				</div>
 				<div class="videos__item">
 					<div class="videos__image"><img src="upload/video/3.jpg" alt=""></div>
 					<div class="videos__wrap">
 						<div class="videos__subtitle">новоселье семьи бабкиных</div>
-						<a href="" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
+						<a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
+					</div>
+				</div>
+				<div class="videos__item">
+					<div class="videos__image"><img src="upload/video/1.jpg" alt=""></div>
+					<div class="videos__wrap">
+						<div class="videos__subtitle">День рождения вари</div>
+						<a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
+					</div>
+				</div>
+				<div class="videos__item">
+					<div class="videos__image"><img src="upload/video/2.jpg" alt=""></div>
+					<div class="videos__wrap">
+						<div class="videos__subtitle">корпоратив для it компании sc</div>
+						<a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
+					</div>
+				</div>
+				<div class="videos__item">
+					<div class="videos__image"><img src="upload/video/3.jpg" alt=""></div>
+					<div class="videos__wrap">
+						<div class="videos__subtitle">новоселье семьи бабкиных</div>
+						<a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk" class="videos__button button button_small"><i class="icon icon-triangle-white"></i><span>Смотреть видео</span></a>
 					</div>
 				</div>
 			</div>
 			<div class="videos__title col">Свадьба <br>Ирины <br>и Михаила</div>
-			<div class="videos__play col"><a href="#"><i class="icon icon-triangle-transparent"></i><span>Смотреть <br>видео</span></a></div>
+			<div class="videos__play col"><a data-fancybox href="https://www.youtube.com/watch?v=_sI_Ps7JSEk"><i class="icon icon-triangle-transparent"></i><span>Смотреть <br>видео</span></a></div>
 		</div>
 	</div>
 	<div class="steps">
@@ -197,64 +226,70 @@
 			</div>
 		</div>
 	</div>
-	<div class="portfolio buffets">
+	<div class="portfolio buffets" id="buffets">
 		<div class="container">
 			<div class="portfolio__title title">Праздничные фуршеты</div>
-			<div class="portfolio__desc">Наша компания сэкономит ваше драгоценное время и возьмет на себя все хлопотыпо организации выездного банкета или фуршета.</div>
-			<div class="portfolio__list">
+			<div class="portfolio__desc">Наша компания сэкономит ваше драгоценное время и возьмет на себя все хлопоты <br>по организации выездного банкета или фуршета.</div>
+			<div class="portfolio__list row_line">
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
 					<div class="portfolio__subtitle">Праздничный фуршет для семьи Сергея и Снежаны Бабкиных</div>
 					<div class="portfolio__subtitle-hidden">фуршет <br>В стиле лофт</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
 					<div class="portfolio__subtitle">Праздничный фуршет для семьи Сергея и Снежаны Бабкиных</div>
 					<div class="portfolio__subtitle-hidden">фуршет <br>В стиле лофт</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
 					<div class="portfolio__subtitle">Праздничный фуршет для семьи Сергея и Снежаны Бабкиных</div>
 					<div class="portfolio__subtitle-hidden">фуршет <br>В стиле лофт</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 			</div>
-			<a data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button button button_transprent button_big">заказать фуршет</a>
+			<a data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button-main button button_transprent button_big">заказать фуршет</a>
 		</div>
 	</div>
-	<div class="portfolio banquets">
+	<div class="portfolio banquets" id="banquets">
 		<div class="container">
 			<div class="portfolio__title title">Организация банкета</div>
-			<div class="portfolio__desc">Доверьте проведение выездного кейтринга нашим специалистам, и у  ваших гостей не возникнетни единого вопроса, и не появится даже малейшего повода для недовольства.</div>
-			<div class="portfolio__list">
+			<div class="portfolio__desc">Доверьте проведение выездного кейтринга нашим специалистам, и у  ваших гостей не возникнет <br>ни единого вопроса, и не появится даже малейшего повода для недовольства.</div>
+			<div class="portfolio__list row_line">
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
 					<div class="portfolio__subtitle">Банкет в загородном доме</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__subtitle-hidden">Банкет <br />в загородном доме</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
 					<div class="portfolio__subtitle">Банкет в загородном доме</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__subtitle-hidden">Банкет <br />в загородном доме</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
 					<div class="portfolio__subtitle">Банкет в загородном доме</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__subtitle-hidden">Банкет <br />в загородном доме</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 			</div>
-			<a data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button button button_transprent button_big">заказать банкет</a>
+			<a data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button-main button button_transprent button_big">заказать банкет</a>
 		</div>
 	</div>
 	<div class="insta">
 		<div class="container">
-			<div class="insta__head">
-				<div class="insta__title title">следите за нами в instagram</div>
+			<div class="insta__head clearfix">
+				<div class="insta__title title title_none">следите за нами в instagram</div>
 				<div class="insta__button"><i class="icon icon-insta"></i><span>Подписаться</span></div>
 			</div>
 			<div class="insta__list row_line">
@@ -267,107 +302,125 @@
 			</div>
 		</div>
 	</div>
-	<div class="portfolio picnic">
+	<div class="portfolio picnic" id="picnic">
 		<div class="container">
 			<div class="portfolio__title title">пикник-барбекю</div>
 			<div class="portfolio__desc">Мы гордимся тем, что из рядового события нам удается сделать захватывающее мероприятие,где все  гости чувствуют себя комфортно.</div>
-			<div class="portfolio__list">
+			<div class="portfolio__list row_line">
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
-					<div class="portfolio__subtitle">Банкет и фуршет <br />в шатрах</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
+					<div class="portfolio__subtitle">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
+					<div class="portfolio__subtitle-hidden">Банкет и фуршет <br />в шатрах</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
-					<div class="portfolio__subtitle">Банкет и фуршет <br />в шатрах</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
+					<div class="portfolio__subtitle">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
+					<div class="portfolio__subtitle-hidden">Банкет и фуршет <br />в шатрах</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
-					<div class="portfolio__subtitle">Банкет и фуршет <br />в шатрах</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
+					<div class="portfolio__subtitle">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
+					<div class="portfolio__subtitle-hidden">Банкет и фуршет <br />в шатрах</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 			</div>
-			<a data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button button button_transprent button_big">заказать пикник</a>
+			<a data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button-main button button_transprent button_big">заказать пикник</a>
 		</div>
 	</div>
-	<div class="text">
+	<div class="wedding" id="wedding">
 		<div class="container">
-			<div class="text__title title">Организация свадьбы</div>
-			<div class="text__desc">Компания Gorbenko Catering предлагает организацию свадеб "под ключ" с комплекснымоформлением, обслуживанием и координацией в день мероприятия.</div>
-			<div class="text__block row">
-				<div class="text__content col">
-					<div class="text__logo"><img src="upload/logo/logo-wedding.png" alt=""></div>
-					<div class="text__text">
+			<div class="wedding__title title">Организация свадьбы</div>
+			<div class="wedding__desc">Компания Gorbenko Catering предлагает организацию свадеб "под ключ" с комплексным <br>оформлением, обслуживанием и координацией в день мероприятия.</div>
+			<div class="wedding__block row">
+				<div class="wedding__content col">
+					<div class="wedding__logo"><img src="upload/logo/logo-wedding.png" alt=""></div>
+					<div class="wedding__text">
 						<p>Выбирая свадьбу на природе, Вы удивите всех своих гостей тем, что ресторанные блюда могут быть приготовлены и профессионально поданы не только в городе, и, например, у Вас на даче или берегу прекрасного озера.</p>
 						<p>Компания Gorbenko Catering предлагает организацию свадеб "под ключ" с комплексным оформлением, обслуживанием и координацией в день мероприятия.</p>
 					</div>
-					<a href="" class="text__button button button_transparent button_small">перейти на сайт</a>
+					<a href="" class="wedding__button button button_transparent button_small">перейти на сайт</a>
 				</div>
-				<div class="text__image col"><img src="upload/1.png" alt=""><p>Свадьба Ирины и михаила</p></div>
+				<div class="wedding__image col"><img src="upload/1.png" alt=""><p>Свадьба Ирины и михаила</p></div>
 			</div>
-			<div class="text__block row">
-				<div class="text__content col">
-					<div class="text__logo"><img src="upload/logo/logo-floristics.png" alt=""></div>
-					<div class="text__text">
+			<div class="wedding__block row">
+				<div class="wedding__content col">
+					<div class="wedding__logo"><img src="upload/logo/logo-floristics.png" alt=""></div>
+					<div class="wedding__text">
 						<p>Мы организуем свадебный банкет или фуршет там, где вы пожелаете. Это может быть Ваше место для проведения, либо мы предложим банкетный зал или площадку на свежем воздухе в Харькове или за городом.</p>
 						<p>Гарантируем, что все будет очень вкусно приготовлено, блюда красиво оформлены и вовремя поданы. При необходимости мы привезем мебель, шатры и все необходимое оборудование.</p>
 					</div>
-					<a href="" class="text__button button button_transparent button_small">перейти на сайт</a>
+					<a href="" class="wedding__button button button_transparent button_small">перейти на сайт</a>
 				</div>
-				<div class="text__image col"><img src="upload/2.png" alt=""><p>Свадьба Ирины и михаила</p></div>
+				<div class="wedding__image col"><img src="upload/2.png" alt=""><p>Свадьба Ирины и михаила</p></div>
 			</div>
 		</div>
 	</div>
-	<div class="portfolio holiday">
+	<div class="portfolio birthday" id="birthday">
 		<div class="container">
 			<div class="portfolio__title title">Детский праздник</div>
 			<div class="portfolio__desc">Мы предложим интересные блюда и закуски в детской тематике. Бутербродики в виде божьей коровки или корабликов,всевозможные шпажки и канапе - всеэто будет приготовлено из лучших, самых качественных и свежих продуктов.</div>
-			<div class="portfolio__list">
+			<div class="portfolio__list row_line">
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
-					<div class="portfolio__subtitle">День рождения <br/>маши</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
+					<div class="portfolio__subtitle">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
+					<div class="portfolio__subtitle-hidden">День рождения <br/>маши</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
-					<div class="portfolio__subtitle">День рождения <br/>рава</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
+					<div class="portfolio__subtitle">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
+					<div class="portfolio__subtitle-hidden">День рождения <br/>рава</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 				<div class="portfolio__item col_line">
 					<div class="portfolio__image"><img src="upload/image.jpg" alt=""></div>
-					<div class="portfolio__subtitle">День рождения <br/>даши</div>
-					<div class="portfolio__subtitle-hidden">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
-					<a href="" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
+					<div class="portfolio__images"><img src="upload/inst/1.png" alt=""><img src="upload/inst/2.png" alt=""><img src="upload/inst/3.png" alt=""><img src="upload/inst/4.png" alt=""><img src="upload/inst/5.png" alt=""><img src="upload/inst/6.png" alt=""></div>
+					<div class="portfolio__subtitle">Праздничный багет для семьи Сергея и Снежаны Бабкиных</div>
+					<div class="portfolio__subtitle-hidden">День рождения <br/>даши</div>
+					<a data-fancybox data-src="#popup-slider" href="javascript:;" class="portfolio__button button button_transparent button_small">Смотреть фотоотчет</a>
 				</div>
 			</div>
-			<a  data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button button button_transprent button_big">заказать</a>
+			<a  data-fancybox data-src="#popup-order" href="javascript:;" class="portfolio__button-main button button_transprent button_big">заказать</a>
 		</div>
 	</div>
 	<div class="reviews">
 		<div class="container">
 			<div class="reviews__title title">отзывы facebook</div>
-			<div class="reviews__desc">Мы предложим интересные блюда и закуски в детской тематике. Бутербродики в виде божьей коровки или корабликов,всевозможные шпажки и канапе - всеэто будет приготовлено из лучших, самых качественных и свежих продуктов.</div>
-			<div class="reviews__wrap"></div>
+			<div class="reviews__desc">Мы предложим интересные блюда и закуски в детской тематике. Бутербродики в виде божьей коровки или корабликов, <br>все возможные шпажки и канапе - всеэто будет приготовлено из лучших, самых качественных и свежих продуктов.</div>
+			<div class="reviews__wrap"><div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></div></div>
 		</div>
 	</div>
 </main>
 
 
-<footer class="footer">
+<footer class="footer" id="contacts">
 	<div class="container">
 		<div class="footer__logo"><img src="upload/logo/logo-catering.png" alt=""></div>
-		<div class="footer__desc">Ресторан выездного обслуживанияв Харькове, Киеве, Днепре</div>
+		<div class="footer__desc">Ресторан выездного обслуживания <br>в Харькове, Киеве, Днепре</div>
 		<div class="footer__phone"><a href="" class="a-phone">+38 (097) 946 26 31</a></div>
 		<div class="footer__email"><a href="" class="a-mail">gorbenkomagic@gmail.com</a></div>
 	</div>
 </footer>
 
+<!-- Scripts -->
+<script src="template/scripts/libs.js"></script>
+<script src="template/scripts/common.js"></script>
 
+<!-- Facebook comments -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = 'https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v2.10';
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 </body>
 </html>

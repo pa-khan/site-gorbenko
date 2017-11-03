@@ -44,7 +44,10 @@ gulp.task('scripts', function() {
 		'app/template/libs/jquery.maskedinput/dist/jquery.maskedinput.min.js',
 		'app/template/libs/slick-carousel/slick/slick.js',
 		'app/template/libs/fancybox/dist/jquery.fancybox.js',
-		'app/template/libs/parallax.js/parallax.js'
+		'app/template/libs/jparallax/js/jquery.parallax.js',
+		'app/template/libs/jparallax/js/jquery.event.frame.js',
+		'app/template/libs/parallax-background/js/parallax-background.js',
+		'app/template/libs/jquery-animateNumber/jquery.animateNumber.js'
 		])
 		.pipe(concat('libs.js')) 
 		.pipe(gulp.dest('app/template/scripts')); 

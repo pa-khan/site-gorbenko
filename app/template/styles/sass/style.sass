@@ -2,10 +2,10 @@
 @import sprite.sass
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700')
 @import url('https://fonts.googleapis.com/css?family=Roboto+Slab:700')
-@import ../../libs/fancybox/dist/jquery.fancybox.css
-@import ../../libs/slick-carousel/slick/slick.css
-@import ../../libs/slick-carousel/slick/slick-theme.css
-
+@import '../../libs/fancybox/dist/jquery.fancybox.css'
+@import '../../libs/slick-carousel/slick/slick.css'
+@import '../../libs/slick-carousel/slick/slick-theme.css'
+@import '../../libs/jparallax/css/jquery.parallax.css'
 
 
 /* Global settings */
@@ -118,13 +118,18 @@ img
 /* Form elements */
 .input
 	display: block
-	font-size: $font-size
+	font-size: 18px
 	font-family: $font-family-1
 	background: white
 	width: 100%
+	border: 2px solid #e6e6e6
+	border-radius: 50px
+	padding: 12.5px 25px
+	transition: all .3s !important
 	&::placeholder
-		color: #878686
-
+		color: #9a9a9a
+	&:focus
+		background-color: #e6e6e6
 .textarea
 	font-size: $font-size
 	font-family: $font-family-1
@@ -174,8 +179,6 @@ img
 	margin-right: auto
 
 
-.popup
-	display: none
 
 .title
 	font-size: 40px
@@ -200,17 +203,23 @@ img
 
 
 
-
+.fancybox-is-open .fancybox-bg
+	opacity: 1
+	background: #000
 
 
 .header
 	position: relative
 	color: white
-	padding-bottom: 65px
+	padding-bottom: 75px
+	background: url('../../img/bg/header.png') center
 	background-size: cover
+	overflow: hidden
 	a
 		color: white
 	&__content
+		z-index: 5
+		position: relative
 		text-align: center
 	&__logo
 		padding-top: 54px
@@ -221,6 +230,7 @@ img
 		font-weight: 700
 		text-transform: uppercase
 		margin-bottom: 20px
+		font-family: $font-family-2
 		span
 			display: block
 			font-size: 60px
@@ -237,10 +247,41 @@ img
 			+ i
 				margin-top: 3px
 				animation: icon 2s infinite linear
-				
-
-
-
+	&__images
+		// overflow: hidden
+		// width: npx
+		// height: npx
+		// img
+		.parallax-layer
+			position: absolute
+			z-index: 4
+			&:nth-of-type(1)
+				top: 38px
+				left: 0
+			&:nth-of-type(2)
+				top: (110px + 200px)
+				left: (425px + 100px)
+			&:nth-of-type(3)
+				top: (485px + 150px)
+				left: (257px + 100px)
+			&:nth-of-type(4)
+				top: (209px + 200px)
+				left: (331px + 100px)
+			&:nth-of-type(5)
+				z-index: 2
+				top: (196px + 200px)
+				left: calc(100% - 206px - 100px)
+			&:nth-of-type(6)
+				z-index: 2
+				top: (210px + 200px)
+				left: calc(100% - 337px - 100px)
+			&:nth-of-type(7)
+				z-index: 1
+				top: 0
+				right: 0
+		.parallax-viewport
+			position: relative
+			overflow: hidden
 .panel
 	position: relative
 	height: 88px
@@ -250,6 +291,7 @@ img
 		left: 50px
 		top: 18px
 		margin-left: -220px
+		z-index: 5
 	&__phone
 		font-size: 24px
 		font-family: $font-family-2
@@ -257,6 +299,8 @@ img
 		font-size: 14px
 		color: rgba(255,255,255,.6)
 	&__nav
+		z-index: 5
+		position: relative
 		text-align: center
 		padding-top: 33px
 		li
@@ -280,6 +324,7 @@ img
 				&:before
 					opacity: 1
 	&__button
+		z-index: 5
 		position: absolute
 		right: -200px
 		top: 20px
@@ -320,13 +365,14 @@ img
 		font-weight: 700
 		text-transform: uppercase
 		margin-bottom: 18px
+		font-family: $font-family-2
 		&:after
 			content: ''
 			display: block
 			width: 56px
 			height: 3px
 			background-color: #e2b768
-			margin-top: 15px
+			margin-top: 10px
 	&__text
 		p
 			margin-bottom: 25px
@@ -345,7 +391,7 @@ img
 		width: 245px
 		border-right: 1px solid #e2b768
 		&:last-of-type
-			margin-right: 0
+			border-right: none
 	&__num
 		padding-top: 15px
 		font-size: 60px
@@ -365,8 +411,11 @@ img
 	&__list
 		margin-left: -306px
 	&__item
+		display: none
 		position: relative
 		margin-bottom: 30px
+		&:nth-of-type(1), &:nth-of-type(2), &:nth-of-type(3)
+			display: block
 		&:last-of-type
 			margin-bottom: 0
 		&:hover
@@ -523,47 +572,354 @@ img
 	color: white
 	background: url('../../img/bg/buffets.jpg') no-repeat center
 	background-size: cover
+	a
+		color: white
 
 
 
 
 .portfolio
 	padding-top: 70px
+	padding-bottom: 80px
+	text-align: center
 	&__desc
 		margin-bottom: 35px
+	&__list
+		margin-left: -15px
+		margin-right: -15px
+	&__item
+		margin-left: 15px
+		margin-right: 15px
+		position: relative
+		width: 315px
+		margin-bottom: 30px
+		overflow: hidden
+		box-shadow: 0 15px 35px rgba(1, 1, 1, 0.5)
+		&:before
+			opacity: 0
+			content: ''
+			position: absolute
+			top: 0
+			left: 0
+			width: 100%
+			height: 100%
+			transition: .3s
+			background: rgba(0,0,0,.6)
+		&:hover
+
+			&:before
+				opacity: 1
+				transition-delay: .2s
+			.portfolio
+				
+				&__subtitle
+					opacity: 1
+					&-hidden
+						transition-delay: .1s
+						transform: translateY(100px)
+				&__subtitle, &__button
+					opacity: 1
+					transition: 0
+					transition-delay: 0
+	&__image
+		img
+			width: 100%
+		&s
+			display: none
+	&__subtitle
+		opacity: 0
+		font-size: 20px
+		font-weight: 700
+		text-transform: uppercase
+		font-family: $font-family-2
+		padding-left: 45px
+		padding-right: 45px
+		position: absolute
+		top: 67px
+		left: 0
+		transition: .3s
+		transition-delay: .1s
+		color: white
+		width: 100%
+		&-hidden
+			position: absolute
+			width: 100%
+			height: 100px
+			background: white
+			bottom: 0
+			left: 0
+			color: $color-1
+			font-size: 20px
+			font-weight: 700
+			font-family: $font-family-2
+			text-transform: uppercase
+			padding-top: 22px
+			transition: .3s
+	&__button
+		opacity: 0
+		position: absolute
+		bottom: 70px
+		left: 50%
+		margin-left: -105px
+		transition: .3s
+		transition-delay: .1s
+		color: white
+		&-main
+			font-size: 20px
+			padding-top: 16px
+			padding-bottom: 16px
+			margin-top: 20px
+
+
+
+
+.banquets
+	padding-top: 85px
+	padding-bottom: 45px
+
+
+
+.insta
+	padding-bottom: 40px
+	&:before
+		content: ''
+		display: block
+		margin-left: auto
+		margin-right: auto
+		margin-bottom: 30px
+		@include sprite($cutlery)
+	&__head
+		margin-bottom: 40px
+	&__title
+		text-align: left
+		width: 700px
+		float: left
+	&__button
+		float: right
+		width: 245px
+		line-height: 54px
+		font-size: 17px
+		font-weight: 700
+		text-transform: uppercase
+		color: white
+		text-align: center
+		background: url('../../img/bg/insta.png') no-repeat center
+		cursor: pointer
+		border-radius: 50px
+		transition: .3s
+		width: 245px !important
+		margin-left: auto
+		margin-right: auto
+		background-size: 100%
+		&:hover
+			background-size: 300%
+		.icon
+			margin-right: 35px
+	&__list
+		margin-left: -20px
+		margin-right: -20px
+	&__item
+		margin-left: 20px
+		margin-right: 20px
+		margin-bottom: 40px
+
+
+.picnic
+	color: white
+	background: url('../../img/bg/picnic.jpg') no-repeat center
+	background-size: cover
+	a
+		color: white
+
+
+.wedding
+	padding-top: 82px
+	padding-bottom: 20px
+	&__desc
+		margin-bottom: 45px
+		text-align: center
+	&__block
+		margin-bottom: 80px
+		text-align: center
+		&:nth-of-type(odd)
+			.wedding
+				&__image
+					float: left
+				&__content
+					float: right
+	&__image
+		float: right
+		width: 463px
+		box-shadow: 0 15px 35px rgba(1, 1, 1, 0.1)
+		img
+			width: 100%
+		p
+			font-size: 20px
+			font-weight: 700
+			text-transform: uppercase
+			font-family: $font-family-2
+			text-align: center
+			padding-top: 25px
+			padding-bottom: 29px
+			background: white
+			padding-left: 5px
+			padding-right: 5px
+	&__content
+		width: 460px
+
+	&__logo
+		margin-bottom: 25px
+		img
+			margin-left: auto
+			margin-right: auto
+	&__text
+		text-align: left
+		p
+			margin-bottom: 26px
+
+
+.birthday
+	color: white
+	background: url('../../img/bg/birthday.jpg') no-repeat center
+	background-size: cover
+	a
+		color: white
+
+.reviews
+	padding-top: 85px
+	padding-bottom: 90px
+	&__desc
+		text-align: center
+		margin-bottom: 50px
+	&__wrap
 		text-align: center
 
 
 
 
 
+.footer
+	color: white
+	text-align: center
+	background: url('../../img/bg/footer.png') no-repeat center
+	background-size: cover
+	padding-top: 73px
+	padding-bottom: 90px
+	a
+		color: white
+	&__logo
+		margin-bottom: 14px
+		img
+			margin-left: auto
+			margin-right: auto
+	&__desc
+		margin-bottom: 40px
+	&__phone
+		font-size: 24px
+		font-family: $font-family-2
+		margin-bottom: 10px
+	&__email
+		font-size: 18px
 
 
+.popup
+	display: none
+	padding: 0 !important
+	&_callback
+		width: 345px
+	&_slider
+		width: 715px
+		.popup
+			&__title
+				&:after
+					display: none
+				.portfolio__subtitle-hidden
+					position: relative
+					background: none
+					font-size: inherit
+					padding-top: 0
+					color: white
+	.fancybox-close-small
+		display: none
+	&__head
+		background: #000
+		padding-bottom: 15px
+	&__body
+		text-align: center
+		padding: 42px 36px
+	&__title
+		font-size: 40px
+		font-weight: 700
+		text-transform: uppercase
+		color: white
+		text-align: left
+		width: calc(100% - 45px)
+	&__close
+		cursor: pointer
+		position: absolute
+		right: 6px
+		top: 46px
+		transition: .3s
+		&:hover
+			transform: rotate(90deg)
+	&__input
+		margin-bottom: 10px
+	&__button
+		background: white
+		padding: 14px 58px
+		margin-top: 20px
+		font-size: 16px
+	&__image, &__images
+		img
+			display: block !important
+	&__image
+		margin-bottom: 18px
+		position: relative
+		&:before, &:after
+			z-index: 1
+			content: ''
+			top: 0
+			position: absolute
+			width: 50%
+			height: 100%
+		&:before
+			left: 0
+			background: -moz-linear-gradient(left, rgba(0,0,0,.7) 0%, transparent 45%, transparent 100%)
+			background: -webkit-linear-gradient(left, rgba(0,0,0,.7) 0%,transparent 45%,transparent 100%)
+			background: linear-gradient(to right, rgba(0,0,0,.7) 0%,transparent 45%,transparent 100%)
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000000', endColorstr='#ffffff',GradientType=1 )
+		&:after
+			right: 0
+			background: -moz-linear-gradient(left, transparent 0%, transparent 55%, rgba(0,0,0,.7) 100%)
+			background: -webkit-linear-gradient(left, transparent 0%,transparent 55%,rgba(0,0,0,.7) 100%)
+			background: linear-gradient(to right, transparent 0%,transparent 55%,rgba(0,0,0,.7) 100%)
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#000000',GradientType=1 )
+	&__images
+		margin-left: -5px
+		margin-right: -5px
+		.slick-slide
+			padding-left: 5px
+			padding-right: 5px
+			img
+				width: 100%
 
+	.slick-arrow
+		z-index: 3
+		width: auto
+		height: auto
+		&:before
+			display: none
+	.slick-prev
+		left: 12px
+		&:hover
+			.icon
+				@include sprite($arrow-left-yellow)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	.slick-next
+		right: 12px
+		&:hover
+			.icon
+				@include sprite($arrow-right-yellow)
 
 
 
@@ -582,3 +938,5 @@ img
 
 	100%
 		transform: translateY(0px)
+
+

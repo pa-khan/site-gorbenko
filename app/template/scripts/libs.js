@@ -18212,415 +18212,1107 @@ return jQuery;
 
 }(document, window, window.jQuery));
 
-/*!
- * parallax.js v1.5.0 (http://pixelcog.github.io/parallax.js/)
- * @copyright 2016 PixelCog, Inc.
- * @license MIT (https://github.com/pixelcog/parallax.js/blob/master/LICENSE)
+// jquery.parallax.js
+// 2.0
+// Stephen Band
+//
+// Project and documentation site:
+// webdev.stephband.info/jparallax/
+//
+// Repository:
+// github.com/stephband/jparallax
+
+(function(jQuery, undefined) {
+	// VAR
+	var debug = true,
+	    
+	    options = {
+	    	mouseport:     'body',  // jQuery object or selector of DOM node to use as mouseport
+	    	xparallax:     true,    // boolean | 0-1 | 'npx' | 'n%'
+	    	yparallax:     true,    //
+	    	xorigin:       0.5,     // 0-1 - Sets default alignment. Only has effect when parallax values are something other than 1 (or true, or '100%')
+	    	yorigin:       0.5,     //
+	    	decay:         0.66,    // 0-1 (0 instant, 1 forever) - Sets rate of decay curve for catching up with target mouse position
+	    	frameDuration: 30,      // Int (milliseconds)
+	    	freezeClass:   'freeze' // String - Class added to layer when frozen
+	    },
+	
+	    value = {
+	    	left: 0,
+	    	top: 0,
+	    	middle: 0.5,
+	    	center: 0.5,
+	    	right: 1,
+	    	bottom: 1
+	    },
+	
+	    rpx = /^\d+\s?px$/,
+	    rpercent = /^\d+\s?%$/,
+	    
+	    win = jQuery(window),
+	    doc = jQuery(document),
+	    mouse = [0, 0];
+	
+	var Timer = (function(){
+		var debug = false;
+		
+		// Shim for requestAnimationFrame, falling back to timer. See:
+		// see http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+		var requestFrame = (function(){
+		    	return (
+		    		window.requestAnimationFrame ||
+		    		window.webkitRequestAnimationFrame ||
+		    		window.mozRequestAnimationFrame ||
+		    		window.oRequestAnimationFrame ||
+		    		window.msRequestAnimationFrame ||
+		    		function(fn, node){
+		    			return window.setTimeout(function(){
+		    				fn();
+		    			}, 25);
+		    		}
+		    	);
+		    })();
+		
+		function Timer() {
+			var callbacks = [],
+				nextFrame;
+			
+			function noop() {}
+			
+			function frame(){
+				var cbs = callbacks.slice(0),
+				    l = cbs.length,
+				    i = -1;
+				
+				if (debug) { console.log('timer frame()', l); }
+				
+				while(++i < l) { cbs[i].call(this); }
+				requestFrame(nextFrame);
+			}
+			
+			function start() {
+				if (debug) { console.log('timer start()'); }
+				this.start = noop;
+				this.stop = stop;
+				nextFrame = frame;
+				requestFrame(nextFrame);
+			}
+			
+			function stop() {
+				if (debug) { console.log('timer stop()'); }
+				this.start = start;
+				this.stop = noop;
+				nextFrame = noop;
+			}
+			
+			this.callbacks = callbacks;
+			this.start = start;
+			this.stop = stop;
+		}
+
+		Timer.prototype = {
+			add: function(fn) {
+				var callbacks = this.callbacks,
+				    l = callbacks.length;
+				
+				// Check to see if this callback is already in the list.
+				// Don't add it twice.
+				while (l--) {
+					if (callbacks[l] === fn) { return; }
+				}
+				
+				this.callbacks.push(fn);
+				if (debug) { console.log('timer add()', this.callbacks.length); }
+			},
+		
+			remove: function(fn) {
+				var callbacks = this.callbacks,
+				    l = callbacks.length;
+				
+				// Remove all instances of this callback.
+				while (l--) {
+					if (callbacks[l] === fn) { callbacks.splice(l, 1); }
+				}
+				
+				if (debug) { console.log('timer remove()', this.callbacks.length); }
+				
+				if (callbacks.length === 0) { this.stop(); }
+			}
+		};
+		
+		return Timer;
+	})();
+	
+	function parseCoord(x) {
+		return (rpercent.exec(x)) ? parseFloat(x)/100 : x;
+	}
+	
+	function parseBool(x) {
+		return typeof x === "boolean" ? x : !!( parseFloat(x) ) ;
+	}
+	
+	function portData(port) {
+		var events = {
+		    	'mouseenter.parallax': mouseenter,
+		    	'mouseleave.parallax': mouseleave
+		    },
+		    winEvents = {
+		    	'resize.parallax': resize
+		    },
+		    data = {
+		    	elem: port,
+		    	events: events,
+		    	winEvents: winEvents,
+		    	timer: new Timer()
+		    },
+		    layers, size, offset;
+		
+		function updatePointer() {
+			data.pointer = getPointer(mouse, [true, true], offset, size);
+		}
+		
+		function resize() {
+			size = getSize(port);
+			offset = getOffset(port);
+			data.threshold = getThreshold(size);
+		}
+		
+		function mouseenter() {
+			data.timer.add(updatePointer);
+		}
+		
+		function mouseleave(e) {
+			data.timer.remove(updatePointer);
+			data.pointer = getPointer([e.pageX, e.pageY], [true, true], offset, size);
+		}
+
+		win.on(winEvents);
+		port.on(events);
+		
+		resize();
+		
+		return data;
+	}
+	
+	function getData(elem, name, fn) {
+		var data = elem.data(name);
+		
+		if (!data) {
+			data = fn ? fn(elem) : {} ;
+			elem.data(name, data);
+		}
+		
+		return data;
+	}
+	
+	function getPointer(mouse, parallax, offset, size){
+		var pointer = [],
+		    x = 2;
+		
+		while (x--) {
+			pointer[x] = (mouse[x] - offset[x]) / size[x] ;
+			pointer[x] = pointer[x] < 0 ? 0 : pointer[x] > 1 ? 1 : pointer[x] ;
+		}
+		
+		return pointer;
+	}
+	
+	function getSize(elem) {
+		return [elem.width(), elem.height()];
+	}
+	
+	function getOffset(elem) {
+		var offset = elem.offset() || {left: 0, top: 0},
+			borderLeft = elem.css('borderLeftStyle') === 'none' ? 0 : parseInt(elem.css('borderLeftWidth'), 10),
+			borderTop = elem.css('borderTopStyle') === 'none' ? 0 : parseInt(elem.css('borderTopWidth'), 10),
+			paddingLeft = parseInt(elem.css('paddingLeft'), 10),
+			paddingTop = parseInt(elem.css('paddingTop'), 10);
+		
+		return [offset.left + borderLeft + paddingLeft, offset.top + borderTop + paddingTop];
+	}
+	
+	function getThreshold(size) {
+		return [1/size[0], 1/size[1]];
+	}
+	
+	function layerSize(elem, x, y) {
+		return [x || elem.outerWidth(), y || elem.outerHeight()];
+	}
+	
+	function layerOrigin(xo, yo) {
+		var o = [xo, yo],
+			i = 2,
+			origin = [];
+		
+		while (i--) {
+			origin[i] = typeof o[i] === 'string' ?
+				o[i] === undefined ?
+					1 :
+					value[origin[i]] || parseCoord(origin[i]) :
+				o[i] ;
+		}
+		
+		return origin;
+	}
+	
+	function layerPx(xp, yp) {
+		return [rpx.test(xp), rpx.test(yp)];
+	}
+	
+	function layerParallax(xp, yp, px) {
+		var p = [xp, yp],
+		    i = 2,
+		    parallax = [];
+		
+		while (i--) {
+			parallax[i] = px[i] ?
+				parseInt(p[i], 10) :
+				parallax[i] = p[i] === true ? 1 : parseCoord(p[i]) ;
+		}
+		
+		return parallax;
+	}
+	
+	function layerOffset(parallax, px, origin, size) {
+		var i = 2,
+		    offset = [];
+		
+		while (i--) {
+			offset[i] = px[i] ?
+				origin[i] * (size[i] - parallax[i]) :
+				parallax[i] ? origin[i] * ( 1 - parallax[i] ) : 0 ;
+		}
+		
+		return offset;
+	}
+	
+	function layerPosition(px, origin) {
+		var i = 2,
+		    position = [];
+		
+		while (i--) {
+			if (px[i]) {
+				// Set css position constant
+				position[i] = origin[i] * 100 + '%';
+			}
+			else {
+			
+			}
+		}
+		
+		return position;
+	}
+	
+	function layerPointer(elem, parallax, px, offset, size) {
+		var viewport = elem.offsetParent(),
+			pos = elem.position(),
+			position = [],
+			pointer = [],
+			i = 2;
+		
+		// Reverse calculate ratio from elem's current position
+		while (i--) {
+			position[i] = px[i] ?
+				// TODO: reverse calculation for pixel case
+				0 :
+				pos[i === 0 ? 'left' : 'top'] / (viewport[i === 0 ? 'outerWidth' : 'outerHeight']() - size[i]) ;
+			
+			pointer[i] = (position[i] - offset[i]) / parallax[i] ;
+		}
+		
+		return pointer;
+	}
+	
+	function layerCss(parallax, px, offset, size, position, pointer) {
+		var pos = [],
+		    cssPosition,
+		    cssMargin,
+		    x = 2,
+		    css = {};
+		
+		while (x--) {
+			if (parallax[x]) {
+				pos[x] = parallax[x] * pointer[x] + offset[x];
+				
+				// We're working in pixels
+				if (px[x]) {
+					cssPosition = position[x];
+					cssMargin = pos[x] * -1;
+				}
+				// We're working by ratio
+				else {
+					cssPosition = pos[x] * 100 + '%';
+					cssMargin = pos[x] * size[x] * -1;
+				}
+				
+				// Fill in css object
+				if (x === 0) {
+					css.left = cssPosition;
+					css.marginLeft = cssMargin;
+				}
+				else {
+					css.top = cssPosition;
+					css.marginTop = cssMargin;
+				}
+			}
+		}
+		
+		return css;
+	}
+	
+	function pointerOffTarget(targetPointer, prevPointer, threshold, decay, parallax, targetFn, updateFn) {
+		var pointer, x;
+		
+		if ((!parallax[0] || Math.abs(targetPointer[0] - prevPointer[0]) < threshold[0]) &&
+		    (!parallax[1] || Math.abs(targetPointer[1] - prevPointer[1]) < threshold[1])) {
+		    // Pointer has hit the target
+		    if (targetFn) { targetFn(); }
+		    return updateFn(targetPointer);
+		}
+		
+		// Pointer is nowhere near the target
+		pointer = [];
+		x = 2;
+		
+		while (x--) {
+			if (parallax[x]) {
+				pointer[x] = targetPointer[x] + decay * (prevPointer[x] - targetPointer[x]);
+			}
+		}
+			
+		return updateFn(pointer);
+	}
+	
+	function pointerOnTarget(targetPointer, prevPointer, threshold, decay, parallax, targetFn, updateFn) {
+		// Don't bother updating if the pointer hasn't changed.
+		if (targetPointer[0] === prevPointer[0] && targetPointer[1] === prevPointer[1]) {
+			return;
+		}
+		
+		return updateFn(targetPointer);
+	}
+	
+	function unport(elem, events, winEvents) {
+		elem.off(events).removeData('parallax_port');
+		win.off(winEvents);
+	}
+	
+	function unparallax(node, port, events) {
+		port.elem.off(events);
+		
+		// Remove this node from layers
+		port.layers = port.layers.not(node);
+		
+		// If port.layers is empty, destroy the port
+		if (port.layers.length === 0) {
+			unport(port.elem, port.events, port.winEvents);
+		}
+	}
+	
+	function unstyle(parallax) {
+		var css = {};
+		
+		if (parallax[0]) {
+			css.left = '';
+			css.marginLeft = '';
+		}
+		
+		if (parallax[1]) {
+			css.top = '';
+			css.marginTop = '';
+		}
+		
+		elem.css(css);
+	}
+	
+	jQuery.fn.parallax = function(o){
+		var options = jQuery.extend({}, jQuery.fn.parallax.options, o),
+		    args = arguments,
+		    elem = options.mouseport instanceof jQuery ?
+		    	options.mouseport :
+		    	jQuery(options.mouseport) ,
+		    port = getData(elem, 'parallax_port', portData),
+		    timer = port.timer;
+		
+		return this.each(function(i) {
+			var node      = this,
+			    elem      = jQuery(this),
+			    opts      = args[i + 1] ? jQuery.extend({}, options, args[i + 1]) : options,
+			    decay     = opts.decay,
+			    size      = layerSize(elem, opts.width, opts.height),
+			    origin    = layerOrigin(opts.xorigin, opts.yorigin),
+			    px        = layerPx(opts.xparallax, opts.yparallax),
+			    parallax  = layerParallax(opts.xparallax, opts.yparallax, px),
+			    offset    = layerOffset(parallax, px, origin, size),
+			    position  = layerPosition(px, origin),
+			    pointer   = layerPointer(elem, parallax, px, offset, size),
+			    pointerFn = pointerOffTarget,
+			    targetFn  = targetInside,
+			    events = {
+			    	'mouseenter.parallax': function mouseenter(e) {
+			    		pointerFn = pointerOffTarget;
+			    		targetFn = targetInside;
+			    		timer.add(frame);
+			    		timer.start();
+			    	},
+			    	'mouseleave.parallax': function mouseleave(e) {
+			    		// Make the layer come to rest at it's limit with inertia
+			    		pointerFn = pointerOffTarget;
+			    		// Stop the timer when the the pointer hits target
+			    		targetFn = targetOutside;
+			    	}
+			    };
+			
+			function updateCss(newPointer) {
+				var css = layerCss(parallax, px, offset, size, position, newPointer);
+				elem.css(css);
+				pointer = newPointer;
+			}
+			
+			function frame() {
+				pointerFn(port.pointer, pointer, port.threshold, decay, parallax, targetFn, updateCss);
+			}
+			
+			function targetInside() {
+				// Pointer hits the target pointer inside the port
+				pointerFn = pointerOnTarget;
+			}
+			
+			function targetOutside() {
+				// Pointer hits the target pointer outside the port
+				timer.remove(frame);
+			}
+			
+			
+			if (jQuery.data(node, 'parallax')) {
+				elem.unparallax();
+			}
+			
+			jQuery.data(node, 'parallax', {
+				port: port,
+				events: events,
+				parallax: parallax
+			});
+			
+			port.elem.on(events);
+			port.layers = port.layers? port.layers.add(node): jQuery(node);
+			
+			/*function freeze() {
+				freeze = true;
+			}
+			
+			function unfreeze() {
+				freeze = false;
+			}*/
+			
+			/*jQuery.event.add(this, 'freeze.parallax', freeze);
+			jQuery.event.add(this, 'unfreeze.parallax', unfreeze);*/
+		});
+	};
+	
+	jQuery.fn.unparallax = function(bool) {
+		return this.each(function() {
+			var data = jQuery.data(this, 'parallax');
+			
+			// This elem is not parallaxed
+			if (!data) { return; }
+			
+			jQuery.removeData(this, 'parallax');
+			unparallax(this, data.port, data.events);
+			if (bool) { unstyle(data.parallax); }
+		});
+	};
+	
+	jQuery.fn.parallax.options = options;
+	
+	// Pick up and store mouse position on document: IE does not register
+	// mousemove on window.
+	doc.on('mousemove.parallax', function(e){
+		mouse = [e.pageX, e.pageY];
+	});
+}(jQuery));
+// jquery.events.frame.js
+// 1.1 - lite
+// Stephen Band
+// 
+// Project home:
+// webdev.stephband.info/events/frame/
+//
+// Source:
+// http://github.com/stephband/jquery.event.frame
+
+(function(jQuery, undefined){
+
+var timer;
+
+// Timer constructor
+// fn - callback to call on each frame, with context set to the timer object
+// fd - frame duration in milliseconds
+
+function Timer( fn, fd ) {
+    var self = this,
+        clock;
+    
+    function update(){
+        self.frameCount++;
+        fn.call(self);
+    }
+    
+    this.frameDuration = fd || 25 ;
+    this.frameCount = -1 ;
+    this.start = function(){
+        update();
+        clock = setInterval(update, this.frameDuration);
+    };
+    this.stop = function(){
+        clearInterval( clock );
+        clock = null;
+    };
+}
+
+// callHandler() is the callback given to the timer object,
+// it makes the event object and calls the handler
+// context is the timer object
+
+function callHandler(){
+    var fn = jQuery.event.special.frame.handler,
+        event = jQuery.Event("frame"),
+        array = this.array,
+        l = array.length;
+    
+    // Give event object properties
+    event.frameCount = this.frameCount;
+    
+    // Call handler on each elem in array
+    while (l--) {
+        fn.call(array[l], event);
+    }
+}
+
+if (!jQuery.event.special.frame) {
+    jQuery.event.special.frame = {
+        // Fires the first time an event is bound per element
+        setup: function(data, namespaces) {
+            if ( timer ) {
+                timer.array.push(this);
+            }
+            else {
+                timer = new Timer( callHandler, data && data.frameDuration );
+                timer.array = [this];
+                
+                // Queue timer to start as soon as this thread has finished
+                var t = setTimeout(function(){
+                    timer.start();
+                    clearTimeout(t);
+                    t = null;
+                }, 0);
+            }
+            return;
+        },
+        // Fires last time event is unbound per element
+        teardown: function(namespaces) {
+            var array = timer.array,
+                l = array.length;
+            
+            // Remove element from list
+            while (l--) {
+                if (array[l] === this) {
+                    array.splice(l, 1);
+                    break;
+                }
+            }
+            
+            // Stop and remove timer when no elems left
+            if (array.length === 0) {
+                timer.stop();
+                timer = undefined;
+            }
+            return;
+        },
+        handler: function(event){
+            // let jQuery handle the calling of event handlers
+
+            // In jQuery >= 1.9.0 jQuery.event.handle is remove, see:
+            // http://jquery.com/upgrade-guide/1.9/#other-undocumented-properties-and-methods
+            if (jQuery.event.handle) {
+                jQuery.event.handle.apply(this, arguments);
+            } else {
+                jQuery.event.dispatch.apply(this, arguments);
+            }
+        }
+    };
+}
+
+})(jQuery);
+/**
+ * Parallax Background version 1.3
+ * https://github.com/erensuleymanoglu/parallax-background
+ *
+ * by Eren Suleymanoglu
+ */
+(function($) {
+	
+	'use strict';
+	
+	/**
+	 * Polyfill for requestAnimationFrame
+	 * via https://gist.github.com/paulirish/1579671
+	 */
+	(function() {
+		var lastTime = 0;
+		var vendors  = ['ms', 'moz', 'webkit', 'o'];
+		
+		for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+			window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+			window.cancelAnimationFrame  = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+		}
+		
+		if (!window.requestAnimationFrame) {
+			window.requestAnimationFrame = function(callback) {
+				var currTime   = new Date().getTime();
+				var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+				var id         = window.setTimeout(function() {
+					callback(currTime + timeToCall);
+				}, timeToCall);
+				lastTime       = currTime + timeToCall;
+				return id;
+			};
+		}
+		
+		if (!window.cancelAnimationFrame) {
+			window.cancelAnimationFrame = function(id) {
+				clearTimeout(id);
+			};
+		}
+	}());
+	
+	/**
+	 * Mobile devices
+	 *
+	 * @returns {boolean}
+	 */
+	function isMobile() {
+		if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent)
+			|| /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0, 4))) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Viewport checker
+	 * via https://github.com/moagrius/isOnScreen
+	 *
+	 * @returns {boolean}
+	 */
+	$.fn.isOnScreen = function() {
+		var win = $(window);
+		
+		var viewport    = {
+			top  : win.scrollTop(),
+			left : win.scrollLeft()
+		};
+		viewport.right  = viewport.left + win.width();
+		viewport.bottom = viewport.top + win.height();
+		
+		var bounds    = this.offset();
+		bounds.right  = bounds.left + this.outerWidth();
+		bounds.bottom = bounds.top + this.outerHeight();
+		
+		return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+	};
+	
+	$.fn.parallaxBackground = function(options) {
+		return this.each(function() {
+			var a = $(this);
+			var b = $(window);
+			var c, d, e, h, p, s, t, w;
+			var pt, pb, pl, pr, hd, wd, wh, ww, of, ot;
+			var x = 0, y = 0, z = 0, g = 0, f = 1;
+			
+			var defaults = {
+				parallaxBgImage    : '',
+				parallaxBgPosition : 'center center',
+				parallaxBgRepeat   : 'no-repeat',
+				parallaxBgSize     : 'cover',
+				parallaxSpeed      : 0.5,
+				parallaxDirection  : 'up'
+			};
+			
+			var data = a.data();
+			
+			var settings = $.extend({}, defaults, options, data);
+			
+			if (settings.parallaxSpeed > 1) {
+				settings.parallaxSpeed = 1;
+			}
+			else if (settings.parallaxSpeed < 0) {
+				settings.parallaxSpeed = 0;
+			}
+			
+			if (a.find('.parallax-inner').length < 1) {
+				a.prepend('<div class="parallax-inner"></div>');
+			}
+			
+			c = a.find('.parallax-inner');
+			
+			function resizeBackground(a) {
+				w = a.outerWidth();
+				h = a.outerHeight();
+				
+				wh = b.height();
+				ww = b.width();
+				
+				if (isMobile()) {
+					f = 2;
+				}
+				
+				if (settings.parallaxDirection === 'left' || settings.parallaxDirection === 'right') {
+					w += f * Math.ceil(ww * (parseFloat(settings.parallaxSpeed)));
+				}
+				
+				if (settings.parallaxDirection === 'up' || settings.parallaxDirection === 'down') {
+					h += f * Math.ceil(wh * (parseFloat(settings.parallaxSpeed)));
+				}
+				
+				return [w, h];
+			}
+			
+			function repositionBackground(a, d) {
+				pl = parseInt(a.css('padding-left').replace('px', ''));
+				pr = parseInt(a.css('padding-right').replace('px', ''));
+				pt = parseInt(a.css('padding-top').replace('px', ''));
+				pb = parseInt(a.css('padding-bottom').replace('px', ''));
+				
+				hd = (d[1] - a.outerHeight()) / 2;
+				wd = (d[0] - a.outerWidth()) / 2;
+				
+				switch (settings.parallaxDirection) {
+					case 'up':
+						x = -pl;
+						y = -(hd + pt);
+						z = 0;
+						break;
+					case 'down':
+						x = -pl;
+						y = -(hd + pt);
+						z = 0;
+						break;
+					case 'left':
+						x = -(wd + pl);
+						y = -pt;
+						z = 0;
+						break;
+					case 'right':
+						x = -(wd + pl);
+						y = -pt;
+						z = 0;
+						break;
+				}
+				
+				return [x, y, z];
+			}
+			
+			function findOffset(x) {
+				of = x.offset();
+				
+				switch (settings.parallaxDirection) {
+					case 'up':
+						of = of.top;
+						break;
+					case 'down':
+						of = of.top + x.outerHeight();
+						break;
+					case 'left':
+						of = of.left + x.outerWidth();
+						break;
+					case 'right':
+						of = of.left;
+						break;
+				}
+				
+				return parseFloat(of)
+			}
+			
+			function getScrollAmount(ot) {
+				return b.scrollTop() - ot;
+			}
+			
+			d = resizeBackground(a);
+			e = repositionBackground(a, d);
+			
+			a.css({
+				'position'   : 'relative',
+				'background' : 'transparent',
+				'overflow'   : 'hidden',
+				'z-index'    : '1'
+			});
+			
+			c.css({
+				'position'            : 'absolute',
+				'background-image'    : 'url(' + settings.parallaxBgImage + ')',
+				'background-position' : settings.parallaxBgPosition,
+				'background-repeat'   : settings.parallaxBgRepeat,
+				'background-size'     : settings.parallaxBgSize,
+				'width'               : d[0],
+				'height'              : d[1],
+				'transform'           : 'translate3d(' + e[0] + 'px, ' + e[1] + 'px, ' + e[2] + 'px)',
+				'transition'          : 'transform 100ms',
+				'z-index'             : '-1'
+			});
+			
+			b.on('resize', function() {
+				d = resizeBackground(a);
+				e = repositionBackground(a, d);
+				
+				c.css({
+					'width'     : d[0],
+					'height'    : d[1],
+					'transform' : 'translate3d(' + e[0] + 'px, ' + e[1] + 'px, ' + e[2] + 'px)'
+				});
+			});
+			
+			if (settings.parallaxDirection === 'left' || settings.parallaxDirection === 'right') {
+				p = 0;
+				s = e[0];
+			}
+			
+			if (settings.parallaxDirection === 'up' || settings.parallaxDirection === 'down') {
+				p = 0;
+				s = e[1];
+			}
+			
+			ot = b.scrollTop();
+			
+			b.on('scroll', function() {
+				if (ot > 0) {
+					g = getScrollAmount(ot);
+				}
+				
+				ot = b.scrollTop();
+				
+				if (a.isOnScreen()) {
+					p = g * (parseFloat(settings.parallaxSpeed) / 4);
+					
+					if (settings.parallaxDirection === 'up' && findOffset(a) > findOffset(c) + 50) {
+						s += -p;
+						t = 'translate3d(' + e[0] + 'px, ' + s + 'px, ' + e[2] + 'px)';
+					}
+					
+					if (settings.parallaxDirection === 'down' && findOffset(a) + 50 < findOffset(c)) {
+						s += p;
+						t = 'translate3d(' + e[0] + 'px, ' + s + 'px, ' + e[2] + 'px)';
+					}
+					
+					if (settings.parallaxDirection === 'left' && findOffset(a) + 50 < findOffset(c)) {
+						s += p;
+						t = 'translate3d(' + s + 'px, ' + e[1] + 'px, ' + e[2] + 'px)';
+					}
+					
+					if (settings.parallaxDirection === 'right' && findOffset(a) > findOffset(c) + 50) {
+						s += -p;
+						t = 'translate3d(' + s + 'px, ' + e[1] + 'px, ' + e[2] + 'px)';
+					}
+					
+					c.css({
+						'width'     : d[0],
+						'height'    : d[1],
+						'transform' : t
+					});
+				}
+				else {
+					if (settings.parallaxDirection === 'up' || settings.parallaxDirection === 'down') {
+						s = e[1];
+					}
+					
+					if (settings.parallaxDirection === 'left' || settings.parallaxDirection === 'right') {
+						s = e[0];
+					}
+					
+					c.css({
+						'width'     : d[0],
+						'height'    : d[1],
+						'transform' : 'translate3d(' + e[0] + 'px, ' + e[1] + 'px, ' + e[2] + 'px)'
+					});
+				}
+			});
+			
+		});
+	}
+})(jQuery);
+/** @preserve jQuery animateNumber plugin v0.0.14
+ * (c) 2013, Alexandr Borisov.
+ * https://github.com/aishek/jquery-animateNumber
  */
 
-;(function ( $, window, document, undefined ) {
-
-  // Polyfill for requestAnimationFrame
-  // via: https://gist.github.com/paulirish/1579671
-
-  (function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-      window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-      window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
-
-    if (!window.requestAnimationFrame)
-      window.requestAnimationFrame = function(callback) {
-        var currTime = new Date().getTime();
-        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-        var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-          timeToCall);
-        lastTime = currTime + timeToCall;
-        return id;
-      };
-
-    if (!window.cancelAnimationFrame)
-      window.cancelAnimationFrame = function(id) {
-        clearTimeout(id);
-      };
-  }());
-
-
-  // Parallax Constructor
-
-  function Parallax(element, options) {
-    var self = this;
-
-    if (typeof options == 'object') {
-      delete options.refresh;
-      delete options.render;
-      $.extend(this, options);
-    }
-
-    this.$element = $(element);
-
-    if (!this.imageSrc && this.$element.is('img')) {
-      this.imageSrc = this.$element.attr('src');
-    }
-
-    var positions = (this.position + '').toLowerCase().match(/\S+/g) || [];
-
-    if (positions.length < 1) {
-      positions.push('center');
-    }
-    if (positions.length == 1) {
-      positions.push(positions[0]);
-    }
-
-    if (positions[0] == 'top' || positions[0] == 'bottom' || positions[1] == 'left' || positions[1] == 'right') {
-      positions = [positions[1], positions[0]];
-    }
-
-    if (this.positionX !== undefined) positions[0] = this.positionX.toLowerCase();
-    if (this.positionY !== undefined) positions[1] = this.positionY.toLowerCase();
-
-    self.positionX = positions[0];
-    self.positionY = positions[1];
-
-    if (this.positionX != 'left' && this.positionX != 'right') {
-      if (isNaN(parseInt(this.positionX))) {
-        this.positionX = 'center';
-      } else {
-        this.positionX = parseInt(this.positionX);
-      }
-    }
-
-    if (this.positionY != 'top' && this.positionY != 'bottom') {
-      if (isNaN(parseInt(this.positionY))) {
-        this.positionY = 'center';
-      } else {
-        this.positionY = parseInt(this.positionY);
-      }
-    }
-
-    this.position =
-      this.positionX + (isNaN(this.positionX)? '' : 'px') + ' ' +
-      this.positionY + (isNaN(this.positionY)? '' : 'px');
-
-    if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
-      if (this.imageSrc && this.iosFix && !this.$element.is('img')) {
-        this.$element.css({
-          backgroundImage: 'url(' + this.imageSrc + ')',
-          backgroundSize: 'cover',
-          backgroundPosition: this.position
-        });
-      }
-      return this;
-    }
-
-    if (navigator.userAgent.match(/(Android)/)) {
-      if (this.imageSrc && this.androidFix && !this.$element.is('img')) {
-        this.$element.css({
-          backgroundImage: 'url(' + this.imageSrc + ')',
-          backgroundSize: 'cover',
-          backgroundPosition: this.position
-        });
-      }
-      return this;
-    }
-
-    this.$mirror = $('<div />').prependTo(this.mirrorContainer);
-
-    var slider = this.$element.find('>.parallax-slider');
-    var sliderExisted = false;
-
-    if (slider.length == 0)
-      this.$slider = $('<img />').prependTo(this.$mirror);
-    else {
-      this.$slider = slider.prependTo(this.$mirror)
-      sliderExisted = true;
-    }
-
-    this.$mirror.addClass('parallax-mirror').css({
-      visibility: 'hidden',
-      zIndex: this.zIndex,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      overflow: 'hidden'
-    });
-
-    this.$slider.addClass('parallax-slider').one('load', function() {
-      if (!self.naturalHeight || !self.naturalWidth) {
-        self.naturalHeight = this.naturalHeight || this.height || 1;
-        self.naturalWidth  = this.naturalWidth  || this.width  || 1;
-      }
-      self.aspectRatio = self.naturalWidth / self.naturalHeight;
-
-      Parallax.isSetup || Parallax.setup();
-      Parallax.sliders.push(self);
-      Parallax.isFresh = false;
-      Parallax.requestRender();
-    });
-
-    if (!sliderExisted)
-      this.$slider[0].src = this.imageSrc;
-
-    if (this.naturalHeight && this.naturalWidth || this.$slider[0].complete || slider.length > 0) {
-      this.$slider.trigger('load');
-    }
-
-  }
-
-
-  // Parallax Instance Methods
-
-  $.extend(Parallax.prototype, {
-    speed:    0.2,
-    bleed:    0,
-    zIndex:   -100,
-    iosFix:   true,
-    androidFix: true,
-    position: 'center',
-    overScrollFix: false,
-    mirrorContainer: 'body',
-
-    refresh: function() {
-      this.boxWidth        = this.$element.outerWidth();
-      this.boxHeight       = this.$element.outerHeight() + this.bleed * 2;
-      this.boxOffsetTop    = this.$element.offset().top - this.bleed;
-      this.boxOffsetLeft   = this.$element.offset().left;
-      this.boxOffsetBottom = this.boxOffsetTop + this.boxHeight;
-
-      var winHeight = Parallax.winHeight;
-      var docHeight = Parallax.docHeight;
-      var maxOffset = Math.min(this.boxOffsetTop, docHeight - winHeight);
-      var minOffset = Math.max(this.boxOffsetTop + this.boxHeight - winHeight, 0);
-      var imageHeightMin = this.boxHeight + (maxOffset - minOffset) * (1 - this.speed) | 0;
-      var imageOffsetMin = (this.boxOffsetTop - maxOffset) * (1 - this.speed) | 0;
-      var margin;
-
-      if (imageHeightMin * this.aspectRatio >= this.boxWidth) {
-        this.imageWidth    = imageHeightMin * this.aspectRatio | 0;
-        this.imageHeight   = imageHeightMin;
-        this.offsetBaseTop = imageOffsetMin;
-
-        margin = this.imageWidth - this.boxWidth;
-
-        if (this.positionX == 'left') {
-          this.offsetLeft = 0;
-        } else if (this.positionX == 'right') {
-          this.offsetLeft = - margin;
-        } else if (!isNaN(this.positionX)) {
-          this.offsetLeft = Math.max(this.positionX, - margin);
-        } else {
-          this.offsetLeft = - margin / 2 | 0;
-        }
-      } else {
-        this.imageWidth    = this.boxWidth;
-        this.imageHeight   = this.boxWidth / this.aspectRatio | 0;
-        this.offsetLeft    = 0;
-
-        margin = this.imageHeight - imageHeightMin;
-
-        if (this.positionY == 'top') {
-          this.offsetBaseTop = imageOffsetMin;
-        } else if (this.positionY == 'bottom') {
-          this.offsetBaseTop = imageOffsetMin - margin;
-        } else if (!isNaN(this.positionY)) {
-          this.offsetBaseTop = imageOffsetMin + Math.max(this.positionY, - margin);
-        } else {
-          this.offsetBaseTop = imageOffsetMin - margin / 2 | 0;
-        }
-      }
-    },
-
-    render: function() {
-      var scrollTop    = Parallax.scrollTop;
-      var scrollLeft   = Parallax.scrollLeft;
-      var overScroll   = this.overScrollFix ? Parallax.overScroll : 0;
-      var scrollBottom = scrollTop + Parallax.winHeight;
-
-      if (this.boxOffsetBottom > scrollTop && this.boxOffsetTop <= scrollBottom) {
-        this.visibility = 'visible';
-        this.mirrorTop = this.boxOffsetTop  - scrollTop;
-        this.mirrorLeft = this.boxOffsetLeft - scrollLeft;
-        this.offsetTop = this.offsetBaseTop - this.mirrorTop * (1 - this.speed);
-      } else {
-        this.visibility = 'hidden';
-      }
-
-      this.$mirror.css({
-        transform: 'translate3d('+this.mirrorLeft+'px, '+(this.mirrorTop - overScroll)+'px, 0px)',
-        visibility: this.visibility,
-        height: this.boxHeight,
-        width: this.boxWidth
-      });
-
-      this.$slider.css({
-        transform: 'translate3d('+this.offsetLeft+'px, '+this.offsetTop+'px, 0px)',
-        position: 'absolute',
-        height: this.imageHeight,
-        width: this.imageWidth,
-        maxWidth: 'none'
-      });
-    }
-  });
-
-
-  // Parallax Static Methods
-
-  $.extend(Parallax, {
-    scrollTop:    0,
-    scrollLeft:   0,
-    winHeight:    0,
-    winWidth:     0,
-    docHeight:    1 << 30,
-    docWidth:     1 << 30,
-    sliders:      [],
-    isReady:      false,
-    isFresh:      false,
-    isBusy:       false,
-
-    setup: function() {
-      if (this.isReady) return;
-
-      var self = this;
-
-      var $doc = $(document), $win = $(window);
-
-      var loadDimensions = function() {
-        Parallax.winHeight = $win.height();
-        Parallax.winWidth  = $win.width();
-        Parallax.docHeight = $doc.height();
-        Parallax.docWidth  = $doc.width();
-      };
-
-      var loadScrollPosition = function() {
-        var winScrollTop  = $win.scrollTop();
-        var scrollTopMax  = Parallax.docHeight - Parallax.winHeight;
-        var scrollLeftMax = Parallax.docWidth  - Parallax.winWidth;
-        Parallax.scrollTop  = Math.max(0, Math.min(scrollTopMax,  winScrollTop));
-        Parallax.scrollLeft = Math.max(0, Math.min(scrollLeftMax, $win.scrollLeft()));
-        Parallax.overScroll = Math.max(winScrollTop - scrollTopMax, Math.min(winScrollTop, 0));
-      };
-
-      $win.on('resize.px.parallax load.px.parallax', function() {
-          loadDimensions();
-          self.refresh();
-          Parallax.isFresh = false;
-          Parallax.requestRender();
-        })
-        .on('scroll.px.parallax load.px.parallax', function() {
-          loadScrollPosition();
-          Parallax.requestRender();
-        });
-
-      loadDimensions();
-      loadScrollPosition();
-
-      this.isReady = true;
-
-      var lastPosition = -1;
-
-      function frameLoop() {
-        if (lastPosition == window.pageYOffset) {   // Avoid overcalculations
-          window.requestAnimationFrame(frameLoop);
-          return false;
-        } else lastPosition = window.pageYOffset;
-
-        self.render();
-        window.requestAnimationFrame(frameLoop);
-      }
-
-      frameLoop();
-    },
-
-    configure: function(options) {
-      if (typeof options == 'object') {
-        delete options.refresh;
-        delete options.render;
-        $.extend(this.prototype, options);
-      }
-    },
-
-    refresh: function() {
-      $.each(this.sliders, function(){ this.refresh(); });
-      this.isFresh = true;
-    },
-
-    render: function() {
-      this.isFresh || this.refresh();
-      $.each(this.sliders, function(){ this.render(); });
-    },
-
-    requestRender: function() {
-      var self = this;
-      self.render();
-      self.isBusy = false;
-    },
-    destroy: function(el){
-      var i,
-          parallaxElement = $(el).data('px.parallax');
-      parallaxElement.$mirror.remove();
-      for(i=0; i < this.sliders.length; i+=1){
-        if(this.sliders[i] == parallaxElement){
-          this.sliders.splice(i, 1);
-        }
-      }
-      $(el).data('px.parallax', false);
-      if(this.sliders.length === 0){
-        $(window).off('scroll.px.parallax resize.px.parallax load.px.parallax');
-        this.isReady = false;
-        Parallax.isSetup = false;
-      }
-    }
-  });
-
-
-  // Parallax Plugin Definition
-
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var options = typeof option == 'object' && option;
-
-      if (this == window || this == document || $this.is('body')) {
-        Parallax.configure(options);
-      }
-      else if (!$this.data('px.parallax')) {
-        options = $.extend({}, $this.data(), options);
-        $this.data('px.parallax', new Parallax(this, options));
-      }
-      else if (typeof option == 'object')
-      {
-        $.extend($this.data('px.parallax'), options);
-      }
-      if (typeof option == 'string') {
-        if(option == 'destroy'){
-            Parallax.destroy(this);
-        }else{
-          Parallax[option]();
-        }
-      }
-    });
-  }
-
-  var old = $.fn.parallax;
-
-  $.fn.parallax             = Plugin;
-  $.fn.parallax.Constructor = Parallax;
-
-
-  // Parallax No Conflict
-
-  $.fn.parallax.noConflict = function () {
-    $.fn.parallax = old;
-    return this;
+// ['...'] notation using to avoid names minification by Google Closure Compiler
+(function($) {
+  var reverse = function(value) {
+    return value.split('').reverse().join('');
   };
 
+  var defaults = {
+    numberStep: function(now, tween) {
+      var floored_number = Math.floor(now),
+          target = $(tween.elem);
 
-  // Parallax Data-API
+      target.text(floored_number);
+    }
+  };
 
-  $( function () { 
-    $('[data-parallax="scroll"]').parallax(); 
-  });
+  var handle = function( tween ) {
+    var elem = tween.elem;
+    if ( elem.nodeType && elem.parentNode ) {
+      var handler = elem._animateNumberSetter;
+      if (!handler) {
+        handler = defaults.numberStep;
+      }
+      handler(tween.now, tween);
+    }
+  };
 
-}(jQuery, window, document));
+  if (!$.Tween || !$.Tween.propHooks) {
+    $.fx.step.number = handle;
+  } else {
+    $.Tween.propHooks.number = {
+      set: handle
+    };
+  }
+
+  var extract_number_parts = function(separated_number, group_length) {
+    var numbers = separated_number.split('').reverse(),
+        number_parts = [],
+        current_number_part,
+        current_index,
+        q;
+
+    for(var i = 0, l = Math.ceil(separated_number.length / group_length); i < l; i++) {
+      current_number_part = '';
+      for(q = 0; q < group_length; q++) {
+        current_index = i * group_length + q;
+        if (current_index === separated_number.length) {
+          break;
+        }
+
+        current_number_part = current_number_part + numbers[current_index];
+      }
+      number_parts.push(current_number_part);
+    }
+
+    return number_parts;
+  };
+
+  var remove_precending_zeros = function(number_parts) {
+    var last_index = number_parts.length - 1,
+        last = reverse(number_parts[last_index]);
+
+    number_parts[last_index] = reverse(parseInt(last, 10).toString());
+    return number_parts;
+  };
+
+  $.animateNumber = {
+    numberStepFactories: {
+      /**
+       * Creates numberStep handler, which appends string to floored animated number on each step.
+       *
+       * @example
+       * // will animate to 100 with "1 %", "2 %", "3 %", ...
+       * $('#someid').animateNumber({
+       *   number: 100,
+       *   numberStep: $.animateNumber.numberStepFactories.append(' %')
+       * });
+       *
+       * @params {String} suffix string to append to animated number
+       * @returns {Function} numberStep-compatible function for use in animateNumber's parameters
+       */
+      append: function(suffix) {
+        return function(now, tween) {
+          var floored_number = Math.floor(now),
+              target = $(tween.elem);
+
+          target.prop('number', now).text(floored_number + suffix);
+        };
+      },
+
+      /**
+       * Creates numberStep handler, which format floored numbers by separating them to groups.
+       *
+       * @example
+       * // will animate with 1 ... 217,980 ... 95,217,980 ... 7,095,217,980
+       * $('#world-population').animateNumber({
+       *    number: 7095217980,
+       *    numberStep: $.animateNumber.numberStepFactories.separator(',')
+       * });
+       * @example
+       * // will animate with 1% ... 217,980% ... 95,217,980% ... 7,095,217,980%
+       * $('#salesIncrease').animateNumber({
+       *   number: 7095217980,
+       *   numberStep: $.animateNumber.numberStepFactories.separator(',', 3, '%')
+       * });
+       *
+       * @params {String} [separator=' '] string to separate number groups
+       * @params {String} [group_length=3] number group length
+       * @params {String} [suffix=''] suffix to append to number
+       * @returns {Function} numberStep-compatible function for use in animateNumber's parameters
+       */
+      separator: function(separator, group_length, suffix) {
+        separator = separator || ' ';
+        group_length = group_length || 3;
+        suffix = suffix || '';
+
+        return function(now, tween) {
+          var negative = now < 0,
+              floored_number = Math.floor((negative ? -1 : 1) * now),
+              separated_number = floored_number.toString(),
+              target = $(tween.elem);
+
+          if (separated_number.length > group_length) {
+            var number_parts = extract_number_parts(separated_number, group_length);
+
+            separated_number = remove_precending_zeros(number_parts).join(separator);
+            separated_number = reverse(separated_number);
+          }
+
+          target.prop('number', now).text((negative ? '-' : '') + separated_number + suffix);
+        };
+      }
+    }
+  };
+
+  $.fn.animateNumber = function() {
+    var options = arguments[0],
+        settings = $.extend({}, defaults, options),
+
+        target = $(this),
+        args = [settings];
+
+    for(var i = 1, l = arguments.length; i < l; i++) {
+      args.push(arguments[i]);
+    }
+
+    // needs of custom step function usage
+    if (options.numberStep) {
+      // assigns custom step functions
+      var items = this.each(function(){
+        this._animateNumberSetter = options.numberStep;
+      });
+
+      // cleanup of custom step functions after animation
+      var generic_complete = settings.complete;
+      settings.complete = function() {
+        items.each(function(){
+          delete this._animateNumberSetter;
+        });
+
+        if ( generic_complete ) {
+          generic_complete.apply(this, arguments);
+        }
+      };
+    }
+
+    return target.animate.apply(target, args);
+  };
+
+}(jQuery));
